@@ -5,21 +5,21 @@ import VibeForm from "@/components/VibeForm";
 import DestinationCards from "@/components/DestinationCards";
 import ItineraryView from "@/components/ItineraryView";
 import LoadingScreen from "@/components/LoadingScreen";
-import type { AppStep, VibeParseResult, Destination, SelectedPlan } from "@/types/travel";
+import type { AppStep, VibeParseResult, Destination, SelectedPlan, TravelFilters } from "@/types/travel";
 
 const Index = () => {
   const [step, setStep] = useState<AppStep>("input");
   const [vibeResult, setVibeResult] = useState<VibeParseResult | null>(null);
   const [itineraryPlan, setItineraryPlan] = useState<SelectedPlan | null>(null);
-  const [formData, setFormData] = useState<{ budget: string; departure_city: string; days: string } | null>(null);
+  const [formData, setFormData] = useState<{ budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
 
-  const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string }) => {
+  const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
     setStep("loading-vibe");
-    setFormData({ budget: data.budget, departure_city: data.departure_city, days: data.days });
+    setFormData({ budget: data.budget, departure_city: data.departure_city, days: data.days, filters: data.filters });
 
     try {
       const { data: result, error } = await supabase.functions.invoke("parse-vibe", {
-        body: data,
+        body: { ...data },
       });
 
       if (error) throw error;
@@ -45,6 +45,7 @@ const Index = () => {
           departure_city: formData.departure_city,
           days: formData.days,
           destinations: destinations.slice(0, 3),
+          filters: formData.filters,
         },
       });
 
