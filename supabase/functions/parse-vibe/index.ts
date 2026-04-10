@@ -9,9 +9,16 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { vibe, budget, departure_city, days } = await req.json();
+    const { vibe, budget, departure_city, days, filters } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const filtersBlock = filters ? `
+Additional User Preferences:
+- Dietary: ${(filters.dietary || []).join(", ") || "none specified"}
+- Travel Style: ${filters.travel_style || "any"}
+- Interests: ${(filters.interests || []).join(", ") || "any"}
+- Constraints: ${(filters.constraints || []).join(", ") || "none"}` : "";
 
     const systemPrompt = `You are an expert travel intelligence engine.
 
@@ -24,6 +31,7 @@ You must:
 - Prefer realistic, budget-aware suggestions
 - Avoid luxury-only destinations unless explicitly requested
 - Focus on places that are actually travelable and popular
+- Consider dietary preferences and constraints when suggesting destinations
 
 Return ONLY valid JSON. No explanations outside JSON.`;
 
@@ -32,6 +40,7 @@ Return ONLY valid JSON. No explanations outside JSON.`;
 - Budget: ${budget}
 - Departure City: ${departure_city}
 - Trip Duration: ${days} days
+${filtersBlock}
 
 Tasks:
 
@@ -54,6 +63,7 @@ Tasks:
 3. Rank destinations based on:
    - vibe match
    - affordability from departure city
+   - suitability for user's dietary and constraint preferences
 
 Output format:
 {
@@ -115,7 +125,6 @@ Output format:
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
     
-    // Extract JSON from response
     let parsed;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
