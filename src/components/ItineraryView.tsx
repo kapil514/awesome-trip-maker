@@ -382,7 +382,7 @@ const ItineraryView = ({ plan, onStartOver, onRegenerate }: ItineraryViewProps) 
           </Button>
         )}
         <Button variant="warm" onClick={onStartOver} className="gap-2">
-          <ArrowLeft className="w-4 h-4" /> Back to Destinations
+          <ArrowLeft className="w-4 h-4" /> Plan Another Trip
         </Button>
       </div>
     </div>
