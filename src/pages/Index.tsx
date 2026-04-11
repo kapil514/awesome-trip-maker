@@ -65,6 +65,11 @@ const Index = () => {
     saveState({ step, vibeResult, itineraryPlan, formData, selectedDestinations });
   }, [step, vibeResult, itineraryPlan, formData, selectedDestinations, initialized]);
 
+  useEffect(() => {
+    if (!initialized) return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step, initialized]);
+
   const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
     setStep("loading-vibe");
     setFormData(data);
@@ -168,7 +173,7 @@ const Index = () => {
       {step === "itinerary" && itineraryPlan && (
         <ItineraryView
           plan={itineraryPlan}
-          onStartOver={handleStartOver}
+            onStartOver={handleBackToDestinations}
           onRegenerate={handleRegenerate}
         />
       )}
