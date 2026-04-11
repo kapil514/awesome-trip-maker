@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import VibeForm from "@/components/VibeForm";
@@ -7,67 +7,15 @@ import ItineraryView from "@/components/ItineraryView";
 import LoadingScreen from "@/components/LoadingScreen";
 import type { AppStep, VibeParseResult, Destination, SelectedPlan, TravelFilters } from "@/types/travel";
 
-const STORAGE_KEY = "wanderlust_state";
-
-interface PersistedState {
-  step: AppStep;
-  vibeResult: VibeParseResult | null;
-  itineraryPlan: SelectedPlan | null;
-  formData: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null;
-  selectedDestinations: Destination[] | null;
-}
-
-function loadState(): PersistedState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedState;
-    // Don't restore loading states
-    if (parsed.step === "loading-vibe" || parsed.step === "loading-itinerary") {
-      parsed.step = parsed.vibeResult ? "destinations" : "input";
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function saveState(state: PersistedState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {}
-}
-
 const Index = () => {
-  const [initialized, setInitialized] = useState(false);
   const [step, setStep] = useState<AppStep>("input");
   const [vibeResult, setVibeResult] = useState<VibeParseResult | null>(null);
   const [itineraryPlan, setItineraryPlan] = useState<SelectedPlan | null>(null);
-  const [formData, setFormData] = useState<PersistedState["formData"]>(null);
-  const [selectedDestinations, setSelectedDestinations] = useState<Destination[] | null>(null);
-
-  // Restore state on mount
-  useEffect(() => {
-    const saved = loadState();
-    if (saved) {
-      setStep(saved.step);
-      setVibeResult(saved.vibeResult);
-      setItineraryPlan(saved.itineraryPlan);
-      setFormData(saved.formData);
-      setSelectedDestinations(saved.selectedDestinations);
-    }
-    setInitialized(true);
-  }, []);
-
-  // Persist state on change
-  useEffect(() => {
-    if (!initialized) return;
-    saveState({ step, vibeResult, itineraryPlan, formData, selectedDestinations });
-  }, [step, vibeResult, itineraryPlan, formData, selectedDestinations, initialized]);
+  const [formData, setFormData] = useState<{ budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
 
   const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
     setStep("loading-vibe");
-    setFormData(data);
+    setFormData({ budget: data.budget, departure_city: data.departure_city, days: data.days, filters: data.filters });
 
     try {
       const { data: result, error } = await supabase.functions.invoke("parse-vibe", {
@@ -88,7 +36,6 @@ const Index = () => {
 
   const handleGenerateItinerary = async (destinations: Destination[]) => {
     if (!formData) return;
-    setSelectedDestinations(destinations);
     setStep("loading-itinerary");
 
     try {
@@ -115,31 +62,17 @@ const Index = () => {
     }
   };
 
-  const handleRegenerate = () => {
-    if (selectedDestinations) {
-      handleGenerateItinerary(selectedDestinations);
-    }
-  };
-
   const handleStartOver = () => {
     setStep("input");
     setVibeResult(null);
     setItineraryPlan(null);
-    setSelectedDestinations(null);
-    // Keep formData so the form is pre-filled
+    setFormData(null);
   };
-
-  const handleBackToDestinations = () => {
-    setStep("destinations");
-    setItineraryPlan(null);
-  };
-
-  if (!initialized) return null;
 
   return (
     <div className="gradient-warm-subtle min-h-screen">
       {step === "input" && (
-        <VibeForm onSubmit={handleVibeSubmit} isLoading={false} initialData={formData} />
+        <VibeForm onSubmit={handleVibeSubmit} isLoading={false} />
       )}
 
       {step === "loading-vibe" && (
@@ -166,11 +99,7 @@ const Index = () => {
       )}
 
       {step === "itinerary" && itineraryPlan && (
-        <ItineraryView
-          plan={itineraryPlan}
-          onStartOver={handleStartOver}
-          onRegenerate={handleRegenerate}
-        />
+        <ItineraryView plan={itineraryPlan} onStartOver={handleStartOver} />
       )}
     </div>
   );

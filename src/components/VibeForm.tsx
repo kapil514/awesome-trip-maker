@@ -6,13 +6,13 @@ import type { TravelFilters } from "@/types/travel";
 interface VibeFormProps {
   onSubmit: (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => void;
   isLoading: boolean;
-  initialData?: { vibe?: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null;
 }
 
 const DIETARY_OPTIONS = [
   { id: "vegetarian", label: "Vegetarian", icon: Leaf },
   { id: "vegan", label: "Vegan", icon: Leaf },
   { id: "jain", label: "Jain", icon: Leaf },
+  { id: "halal", label: "Halal", icon: UtensilsCrossed },
 ];
 
 const INTEREST_OPTIONS = [
@@ -35,17 +35,17 @@ const CONSTRAINT_OPTIONS = [
 
 const STYLE_OPTIONS = ["Backpacking", "Budget", "Mid-range", "Luxury", "Family", "Solo"];
 
-const VibeForm = ({ onSubmit, isLoading, initialData }: VibeFormProps) => {
-  const [vibe, setVibe] = useState(initialData?.vibe || "");
-  const [budget, setBudget] = useState(initialData?.budget || "");
-  const [departureCity, setDepartureCity] = useState(initialData?.departure_city || "");
-  const [days, setDays] = useState(initialData?.days || "");
+const VibeForm = ({ onSubmit, isLoading }: VibeFormProps) => {
+  const [vibe, setVibe] = useState("");
+  const [budget, setBudget] = useState("");
+  const [departureCity, setDepartureCity] = useState("");
+  const [days, setDays] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const [dietary, setDietary] = useState<string[]>(initialData?.filters?.dietary || []);
-  const [travelStyle, setTravelStyle] = useState(initialData?.filters?.travel_style || "");
-  const [interests, setInterests] = useState<string[]>(initialData?.filters?.interests || []);
-  const [constraints, setConstraints] = useState<string[]>(initialData?.filters?.constraints || []);
+  const [dietary, setDietary] = useState<string[]>([]);
+  const [travelStyle, setTravelStyle] = useState("");
+  const [interests, setInterests] = useState<string[]>([]);
+  const [constraints, setConstraints] = useState<string[]>([]);
 
   const vibeExamples = [
     "Plan me a 5-day Bali trip under ₹1.5L, vegetarian-friendly, good WiFi",
