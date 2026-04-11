@@ -6,6 +6,7 @@ import type { TravelFilters } from "@/types/travel";
 interface VibeFormProps {
   onSubmit: (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => void;
   isLoading: boolean;
+  initialData?: { vibe?: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null;
 }
 
 const DIETARY_OPTIONS = [
