@@ -22,6 +22,7 @@ export interface VibeParseResult {
 }
 
 export interface Activity {
+  id: string;
   time: string;
   title: string;
   duration: string;
@@ -30,6 +31,7 @@ export interface Activity {
   dietary_tags?: string[];
   lat?: number;
   lng?: number;
+  selected: boolean;
 }
 
 export interface TimeSlot {
@@ -43,6 +45,7 @@ export interface FoodSpot {
   dietary_tags: string[];
   price_range: string;
   must_try_dish?: string;
+  meal_time?: "morning" | "afternoon" | "dinner";
 }
 
 export interface StayRecommendation {
