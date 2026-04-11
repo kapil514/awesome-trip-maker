@@ -13,6 +13,7 @@ const DIETARY_OPTIONS = [
   { id: "vegetarian", label: "Vegetarian", icon: Leaf },
   { id: "vegan", label: "Vegan", icon: Leaf },
   { id: "jain", label: "Jain", icon: Leaf },
+  { id: "non-veg", label: "Non-Veg", icon: UtensilsCrossed },
 ];
 
 const INTEREST_OPTIONS = [
