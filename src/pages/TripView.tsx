@@ -42,7 +42,7 @@ const TripView = () => {
 
   if (!plan) return null;
 
-  return <ItineraryView plan={plan} onStartOver={() => navigate("/dashboard")} />;
+  return <ItineraryView plan={plan} onStartOver={() => navigate("/dashboard")} tripId={id} />;
 };
 
 export default TripView;

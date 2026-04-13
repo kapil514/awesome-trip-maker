@@ -15,6 +15,7 @@ const Index = () => {
   const [step, setStep] = useState<AppStep>("input");
   const [vibeResult, setVibeResult] = useState<VibeParseResult | null>(null);
   const [itineraryPlan, setItineraryPlan] = useState<SelectedPlan | null>(null);
+  const [savedTripId, setSavedTripId] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
 
   const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
@@ -63,7 +64,7 @@ const Index = () => {
       // Save trip to database
       if (user) {
         const destNames = (plan as SelectedPlan).destinations?.map((d: any) => `${d.city}, ${d.country}`).join(" → ") || destinations[0]?.city || "Trip";
-        const { error: saveError } = await supabase.from("trips").insert({
+        const { data: savedTrip, error: saveError } = await supabase.from("trips").insert({
           user_id: user.id,
           destination: destNames,
           days: parseInt(formData.days) || 1,
@@ -72,9 +73,12 @@ const Index = () => {
           vibe_text: formData.vibe,
           itinerary_data: plan as any,
           filters: formData.filters as any,
-        });
+        }).select("id").single();
         if (saveError) console.error("Failed to save trip:", saveError);
-        else toast.success("Trip saved to your dashboard!");
+        else {
+          setSavedTripId(savedTrip.id);
+          toast.success("Trip saved to your dashboard!");
+        }
       }
     } catch (e: any) {
       console.error(e);
@@ -87,6 +91,7 @@ const Index = () => {
     setStep("input");
     setVibeResult(null);
     setItineraryPlan(null);
+    setSavedTripId(null);
     setFormData(null);
   };
 
@@ -107,7 +112,7 @@ const Index = () => {
       )}
 
       {step === "itinerary" && itineraryPlan && (
-        <ItineraryView plan={itineraryPlan} onStartOver={handleStartOver} />
+        <ItineraryView plan={itineraryPlan} onStartOver={handleStartOver} tripId={savedTripId || undefined} />
       )}
     </div>
   );
