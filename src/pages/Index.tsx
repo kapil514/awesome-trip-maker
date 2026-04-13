@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import VibeForm from "@/components/VibeForm";
 import DestinationCards from "@/components/DestinationCards";
@@ -8,14 +10,16 @@ import LoadingScreen from "@/components/LoadingScreen";
 import type { AppStep, VibeParseResult, Destination, SelectedPlan, TravelFilters } from "@/types/travel";
 
 const Index = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState<AppStep>("input");
   const [vibeResult, setVibeResult] = useState<VibeParseResult | null>(null);
   const [itineraryPlan, setItineraryPlan] = useState<SelectedPlan | null>(null);
-  const [formData, setFormData] = useState<{ budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
+  const [formData, setFormData] = useState<{ vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
 
   const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
     setStep("loading-vibe");
-    setFormData({ budget: data.budget, departure_city: data.departure_city, days: data.days, filters: data.filters });
+    setFormData(data);
 
     try {
       const { data: result, error } = await supabase.functions.invoke("parse-vibe", {
@@ -55,6 +59,23 @@ const Index = () => {
       const plan = result?.selected_plan || result;
       setItineraryPlan(plan as SelectedPlan);
       setStep("itinerary");
+
+      // Save trip to database
+      if (user) {
+        const destNames = (plan as SelectedPlan).destinations?.map((d: any) => `${d.city}, ${d.country}`).join(" → ") || destinations[0]?.city || "Trip";
+        const { error: saveError } = await supabase.from("trips").insert({
+          user_id: user.id,
+          destination: destNames,
+          days: parseInt(formData.days) || 1,
+          budget: formData.budget,
+          departure_city: formData.departure_city,
+          vibe_text: formData.vibe,
+          itinerary_data: plan as any,
+          filters: formData.filters as any,
+        });
+        if (saveError) console.error("Failed to save trip:", saveError);
+        else toast.success("Trip saved to your dashboard!");
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || "Failed to generate itinerary. Please try again.");
@@ -71,31 +92,18 @@ const Index = () => {
 
   return (
     <div className="gradient-warm-subtle min-h-screen">
-      {step === "input" && (
-        <VibeForm onSubmit={handleVibeSubmit} isLoading={false} />
-      )}
+      {step === "input" && <VibeForm onSubmit={handleVibeSubmit} isLoading={false} />}
 
       {step === "loading-vibe" && (
-        <LoadingScreen
-          message="Reading your vibe..."
-          submessage="Our AI travel expert is analyzing your preferences and finding the perfect destinations"
-        />
+        <LoadingScreen message="Reading your vibe..." submessage="Our AI travel expert is analyzing your preferences and finding the perfect destinations" />
       )}
 
       {step === "destinations" && vibeResult && (
-        <DestinationCards
-          destinations={vibeResult.destinations}
-          preferences={vibeResult.parsed_preferences}
-          onGenerateItinerary={handleGenerateItinerary}
-          isLoading={false}
-        />
+        <DestinationCards destinations={vibeResult.destinations} preferences={vibeResult.parsed_preferences} onGenerateItinerary={handleGenerateItinerary} isLoading={false} />
       )}
 
       {step === "loading-itinerary" && (
-        <LoadingScreen
-          message="Crafting your itinerary..."
-          submessage="Optimizing routes, budgets, and experiences for the perfect trip"
-        />
+        <LoadingScreen message="Crafting your itinerary..." submessage="Optimizing routes, budgets, and experiences for the perfect trip" />
       )}
 
       {step === "itinerary" && itineraryPlan && (
