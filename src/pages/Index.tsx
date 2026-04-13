@@ -112,7 +112,7 @@ const Index = () => {
       )}
 
       {step === "itinerary" && itineraryPlan && (
-        <ItineraryView plan={itineraryPlan} onStartOver={handleStartOver} />
+        <ItineraryView plan={itineraryPlan} onStartOver={handleStartOver} tripId={savedTripId || undefined} />
       )}
     </div>
   );
