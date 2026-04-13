@@ -25,7 +25,7 @@ const TripView = () => {
         return;
       }
 
-      setPlan(data.itinerary_data as SelectedPlan);
+      setPlan(data.itinerary_data as unknown as SelectedPlan);
       setLoading(false);
     };
 
