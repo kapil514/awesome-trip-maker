@@ -15,6 +15,7 @@ const Index = () => {
   const [step, setStep] = useState<AppStep>("input");
   const [vibeResult, setVibeResult] = useState<VibeParseResult | null>(null);
   const [itineraryPlan, setItineraryPlan] = useState<SelectedPlan | null>(null);
+  const [savedTripId, setSavedTripId] = useState<string | null>(null);
   const [formData, setFormData] = useState<{ vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters } | null>(null);
 
   const handleVibeSubmit = async (data: { vibe: string; budget: string; departure_city: string; days: string; filters: TravelFilters }) => {
