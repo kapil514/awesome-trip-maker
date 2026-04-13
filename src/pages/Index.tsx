@@ -91,6 +91,7 @@ const Index = () => {
     setStep("input");
     setVibeResult(null);
     setItineraryPlan(null);
+    setSavedTripId(null);
     setFormData(null);
   };
 
