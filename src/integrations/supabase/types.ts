@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          budget: string | null
+          created_at: string
+          days: number
+          departure_city: string | null
+          destination: string
+          filters: Json | null
+          id: string
+          itinerary_data: Json
+          updated_at: string
+          user_id: string
+          vibe_text: string | null
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          days: number
+          departure_city?: string | null
+          destination: string
+          filters?: Json | null
+          id?: string
+          itinerary_data?: Json
+          updated_at?: string
+          user_id: string
+          vibe_text?: string | null
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          days?: number
+          departure_city?: string | null
+          destination?: string
+          filters?: Json | null
+          id?: string
+          itinerary_data?: Json
+          updated_at?: string
+          user_id?: string
+          vibe_text?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
